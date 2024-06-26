@@ -1,0 +1,89 @@
+name: Recurrent security check
+
+on:
+  schedule:
+    - cron: '0 0 * * MON'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  security-check:
+    timeout-minutes: 40
+    runs-on: ubuntu-latest
+    steps:
+
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up JDK
+        if: ${{ inputs.java-check == true }}
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ inputs.java-version }}
+          distribution: ${{ inputs.java-distribution }}
+          overwrite-settings: false
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+
+      - name: Build project
+        if: ${{ inputs.java-check == true }}
+        run: ./gradlew build -x test
+
+      - name: Run OWASP Dependency-Check
+        if: ${{ inputs.java-check == true }}
+        timeout-minutes: 60
+        id: owap-run
+        shell: bash
+        run: |
+          VERSION=$(curl -s https://jeremylong.github.io/DependencyCheck/current.txt)
+          curl -Ls "https://github.com/jeremylong/DependencyCheck/releases/download/v$VERSION/dependency-check-$VERSION-release.zip" --output dependency-check.zip
+          unzip dependency-check.zip
+          cd dependency-check/bin
+          chmod +x dependency-check.sh
+          ./dependency-check.sh --project "$GITHUB_REPOSITORY" --scan ../../build --out . --format "ALL"
+        working-directory: ${{ github.workspace }}
+
+      - name: Display csv OWASP report
+        shell: bash
+        if: ${{ inputs.java-check == true }}
+        run: |
+          cat dependency-check/bin/dependency-check-report.csv
+
+      - name: Check OSWAP result fails
+        id: check-oswap
+        if: ${{ inputs.java-check == true }}
+        uses: actions/github-script@v7
+        with:
+          result-encoding: string
+          script: |
+            const fs = require('fs').promises;
+            var reportBulk = (await fs.readFile("dependency-check/bin/dependency-check-report.csv")).toString();
+            var count = (reportBulk.match(/CRITICAL/g) || []).length;
+            if (count>0) {
+              return count+" Java critical vulnerabilities found";
+            }
+            else {
+              console.log('No java critical vulnerabilities found');
+              return "0";
+            }
+
+      - name: Oswap log
+        if: ${{steps.check-oswap.outputs.result!='0'}}
+        uses: actions/github-script@v7
+        env:
+          EXEC_RESULT: ${{steps.check-oswap.outputs.result}}
+        with:
+          script: |
+            console.log(process.env.EXEC_RESULT);
+
+      ## Review
+      - name: check files and data
+        shell: bash
+        run: |
+          ls -la ${GITHUB_WORKSPACE}
+          echo $GITHUB_ENV
+

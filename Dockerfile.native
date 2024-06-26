@@ -1,0 +1,14 @@
+FROM quay.io/quarkus/ubi-quarkus-mandrel-builder-image:jdk-21 AS build
+
+COPY gradle gradle
+COPY gradlew .
+
+COPY build.gradle build.gradle
+COPY gradle.properties gradle.properties
+COPY settings.gradle settings.gradle
+
+COPY src src
+RUN ./gradlew
+
+RUN ./gradlew build -Dquarkus.native.enabled=true -Dquarkus.package.jar.enabled=false
+ENTRYPOINT ./build/quarkus_pg-1.0-SNAPSHOT-runner
