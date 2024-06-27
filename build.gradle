@@ -1,6 +1,7 @@
 plugins {
     id 'java'
     id 'io.quarkus'
+    id 'com.diffplug.spotless' version '6.25.0'
 }
 
 repositories {
@@ -12,7 +13,6 @@ dependencies {
     implementation enforcedPlatform("${quarkusPlatformGroupId}:${quarkusPlatformArtifactId}:${quarkusPlatformVersion}")
     implementation enforcedPlatform("${quarkusPlatformGroupId}:quarkus-camel-bom:${quarkusPlatformVersion}")
     implementation 'org.apache.camel.quarkus:camel-quarkus-telegram'
-    //implementation 'io.quarkus:quarkus-hibernate-orm'
     implementation 'io.quarkus:quarkus-info'
     implementation 'io.quarkus:quarkus-rest-client-jackson'
     implementation 'io.quarkus:quarkus-rest-client'
@@ -22,8 +22,18 @@ dependencies {
     implementation 'io.quarkus:quarkus-jdbc-postgresql'
     implementation 'io.quarkus:quarkus-arc'
     implementation 'io.quarkus:quarkus-rest'
+
+    implementation 'io.quarkus:quarkus-smallrye-health'
+    implementation 'io.quarkus:quarkus-smallrye-fault-tolerance'
+
     testImplementation 'io.quarkus:quarkus-junit5'
     testImplementation 'io.rest-assured:rest-assured'
+
+    implementation 'io.quarkus:quarkus-rest-jackson'
+    implementation 'io.quarkus:quarkus-jdbc-postgresql'
+    implementation 'io.quarkus:quarkus-hibernate-orm-panache'
+    implementation 'io.quarkus:quarkus-smallrye-openapi'
+
 }
 
 group 'net.company'
@@ -45,3 +55,22 @@ compileJava {
 compileTestJava {
     options.encoding ='UTF-8'
 }
+
+
+spotless {
+    enforceCheck false
+    java {
+        importOrder()
+        removeUnusedImports()
+        //cleanthat().version('2.18')
+        googleJavaFormat().reflowLongStrings()
+        formatAnnotations()
+        toggleOffOn()
+        licenseHeader '/* MyCompany Italy - $YEAR */'
+    }
+}
+tasks.register('updateGitHooks', Copy) {
+    from './scripts/pre-commit'
+    into './.git/hooks'
+}
+compileJava.dependsOn updateGitHooks

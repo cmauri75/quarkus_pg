@@ -1,6 +1,15 @@
 -- This file allow to write SQL commands that will be emitted in test and dev.
--- The commands are commented as their support depends of the database
--- insert into myentity (id, field) values(1, 'field-1');
--- insert into myentity (id, field) values(2, 'field-2');
--- insert into myentity (id, field) values(3, 'field-3');
--- alter sequence myentity_seq restart with 4;
+INSERT INTO Beverage(id,name,flavour) VALUES (1,'Negroni','Happiness');
+INSERT INTO Beverage(id,name,flavour) VALUES (2,'Mojito','Mint');
+INSERT INTO Beverage(id,name,flavour) VALUES (3,'Moskow mule','Ginger');
+ALTER SEQUENCE beverage_seq RESTART WITH 4;
+INSERT INTO Fruit(id,name,season) VALUES (1,'Mango','Spring');
+INSERT INTO Fruit(id,name,season) VALUES (2,'Strawberry','Spring');
+INSERT INTO Fruit(id,name,season) VALUES (3,'Orange','Winter');
+INSERT INTO Fruit(id,name,season) VALUES (4,'Lemon','Winter');
+INSERT INTO Fruit(id,name,season) VALUES (5,'Blueberry','Summer');
+INSERT INTO Fruit(id,name,season) VALUES (6,'Banana','Summer');
+INSERT INTO Fruit(id,name,season) VALUES (7,'Watermelon','Summer');
+INSERT INTO Fruit(id,name,season) VALUES (8,'Apple','Fall');
+INSERT INTO Fruit(id,name,season) VALUES (9,'Pear','Fall');
+ALTER SEQUENCE fruit_seq RESTART WITH 10;

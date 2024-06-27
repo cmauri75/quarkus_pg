@@ -1,0 +1,18 @@
+services:
+  redis:
+    image: "redis/redis-stack:6.2.6-v7"
+    ports:
+      - "6379:6379"
+      - "8001:8001"
+    environment:
+      - REDIS_REPLICATION_MODE=master
+  db:
+    image: postgres:15
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+
+

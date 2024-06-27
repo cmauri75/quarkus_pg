@@ -1,2 +1,18 @@
-greeting:
-  message: "hello"
+app:
+  message: "Hello"
+quarkus:
+  datasource:
+    db-kind: postgresql
+    username: postgres
+    password: postgres
+    jdbc:
+      url: jdbc:postgresql://localhost:5432/postgres
+  hibernate-orm:
+    database:
+      generation: drop-and-create
+    sql-load-script:
+      - import.sql
+  rest-client:
+    "net.company.client.FruityViceService":
+      url: "https://fruityvice.com"
+
